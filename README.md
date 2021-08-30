@@ -1,4 +1,5 @@
 # Vonage-challenge
+
 Vonage Challenge Project repository dedicated for the recruitment process.
 
 # Contact Centre application
@@ -13,7 +14,6 @@ There are 3 levels of employees: Agents, Supervisors, General Managers:
 
     - There can be only one General Manager.
 
-
 There are 2 types of interactions: voice (phone), non-voice (text chat) with interaction routing protocols as follows:
 
     An Agent can handle 1 voice or 2 non-voice interactions at a time.
@@ -21,7 +21,6 @@ There are 2 types of interactions: voice (phone), non-voice (text chat) with int
     A Supervisor can handle 1 voice or 2 non-voice interactions at a time.
 
     The General Manager can handle 1 interaction at a time.
-
 
 The contact center allocates the incoming interactions in a specific way.
 
@@ -38,10 +37,29 @@ The contact center allocates the incoming interactions in a specific way.
 **How much time did you spend?**
 
 **How can we build your solution and run unit tests?**
+To run the application in browser make sure you have node installed (LTS, 16 used during development), clone this repo, run
+
+```
+npm install
+```
+
+and then
+
+```
+ng serve --open
+```
+
+to open the app in browser.
+
+To run tests:
+
+```
+ng test
+```
 
 **What technologies / libraries / programming paradigms have you chosen? Why?**
-Angular, Typescript with Jest for Testing. Angular has a good modularity built in while keeping very well separated contextes. State management is handled with RxJS and Redux (NgRx) with the Observables, changes are detected on push. 
+Angular, Typescript with Jest for Testing. Angular has a good modularity built in while keeping very well separated contextes. State management is handled with RxJS and Redux (NgRx) with the Observables, changes are detected on push.
 
-Jest is for unit testing without having a real browser thanks to JSDom. To have it working with Angular some adjustment have been done to the configuration.
+Karma and Jasmine are used for unit testing as support for Jest is not fully added for Angular 12.
 
 **Have you done any modeling / planning before coding? Please share that with us :)**
