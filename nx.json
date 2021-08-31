@@ -27,6 +27,9 @@
     ]
   },
   "projects": {
+    "agents": {
+      "tags": []
+    },
     "interactions": {
       "tags": []
     },
