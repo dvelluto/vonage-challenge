@@ -1,4 +1,4 @@
-import { BehaviorSubject, Observable, Subject } from "rxjs";
+import { BehaviorSubject, Observable } from "rxjs";
 import { delay, skipWhile } from 'rxjs/operators';
 import { InteractionInterface } from "../interfaces";
 
