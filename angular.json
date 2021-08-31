@@ -1,6 +1,31 @@
 {
   "version": 1,
   "projects": {
+    "interactions": {
+      "projectType": "library",
+      "root": "libs/interactions",
+      "sourceRoot": "libs/interactions/src",
+      "prefix": "vonage-challenge",
+      "architect": {
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/interactions"],
+          "options": {
+            "jestConfig": "libs/interactions/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/interactions/src/**/*.ts",
+              "libs/interactions/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
     "vonage-app": {
       "projectType": "application",
       "root": "apps/vonage-app",
