@@ -3,7 +3,7 @@ sudo: required
 
 language: node_js
 node_js:
-  - "16"
+  - '16'
 
 addons:
   chrome: stable
@@ -15,4 +15,4 @@ install:
   - npm install
 
 script:
-  - npm run test-headless
+  - ng test vonage-app
