@@ -1,34 +1,26 @@
 {
-  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
-  "newProjectRoot": "projects",
   "projects": {
     "vonage-app": {
       "projectType": "application",
-      "schematics": {
-        "@schematics/angular:application": {
-          "strict": true
-        }
-      },
-      "root": "",
-      "sourceRoot": "src",
-      "prefix": "app",
+      "root": "apps/vonage-app",
+      "sourceRoot": "apps/vonage-app/src",
+      "prefix": "vonage-challenge",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
+          "outputs": ["{options.outputPath}"],
           "options": {
-            "outputPath": "dist/vonage-app",
-            "index": "src/index.html",
-            "main": "src/main.ts",
-            "polyfills": "src/polyfills.ts",
-            "tsConfig": "tsconfig.app.json",
+            "outputPath": "dist/apps/vonage-app",
+            "index": "apps/vonage-app/src/index.html",
+            "main": "apps/vonage-app/src/main.ts",
+            "polyfills": "apps/vonage-app/src/polyfills.ts",
+            "tsConfig": "apps/vonage-app/tsconfig.app.json",
             "assets": [
-              "src/favicon.ico",
-              "src/assets"
+              "apps/vonage-app/src/favicon.ico",
+              "apps/vonage-app/src/assets"
             ],
-            "styles": [
-              "src/styles.css"
-            ],
+            "styles": ["apps/vonage-app/src/styles.css"],
             "scripts": []
           },
           "configurations": {
@@ -47,8 +39,8 @@
               ],
               "fileReplacements": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "replace": "apps/vonage-app/src/environments/environment.ts",
+                  "with": "apps/vonage-app/src/environments/environment.prod.ts"
                 }
               ],
               "outputHashing": "all"
@@ -82,24 +74,81 @@
             "browserTarget": "vonage-app:build"
           }
         },
-        "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
           "options": {
-            "main": "src/test.ts",
-            "polyfills": "src/polyfills.ts",
-            "tsConfig": "tsconfig.spec.json",
-            "karmaConfig": "karma.conf.js",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.css"
-            ],
-            "scripts": []
+            "lintFilePatterns": [
+              "apps/vonage-app/src/**/*.ts",
+              "apps/vonage-app/src/**/*.html"
+            ]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/apps/vonage-app"],
+          "options": {
+            "jestConfig": "apps/vonage-app/jest.config.js",
+            "passWithNoTests": true
           }
         }
       }
+    },
+    "vonage-app-e2e": {
+      "root": "apps/vonage-app-e2e",
+      "sourceRoot": "apps/vonage-app-e2e/src",
+      "projectType": "application",
+      "architect": {
+        "e2e": {
+          "builder": "@nrwl/cypress:cypress",
+          "options": {
+            "cypressConfig": "apps/vonage-app-e2e/cypress.json",
+            "devServerTarget": "vonage-app:serve:development",
+            "tsConfig": "apps/vonage-app-e2e/tsconfig.json"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "vonage-app:serve:production"
+            }
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["apps/vonage-app-e2e/**/*.{js,ts}"]
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "defaultCollection": "@nrwl/angular",
+    "packageManager": "npm"
+  },
+  "schematics": {
+    "@nrwl/angular": {
+      "application": {
+        "linter": "eslint"
+      },
+      "library": {
+        "linter": "eslint"
+      },
+      "storybook-configuration": {
+        "linter": "eslint"
+      }
+    },
+    "@nrwl/angular:application": {
+      "style": "css",
+      "linter": "eslint",
+      "unitTestRunner": "jest",
+      "e2eTestRunner": "cypress"
+    },
+    "@nrwl/angular:library": {
+      "style": "css",
+      "linter": "eslint",
+      "unitTestRunner": "jest"
+    },
+    "@nrwl/angular:component": {
+      "style": "css"
     }
   },
   "defaultProject": "vonage-app"

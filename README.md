@@ -37,29 +37,24 @@ The contact center allocates the incoming interactions in a specific way.
 **How much time did you spend?**
 
 **How can we build your solution and run unit tests?**
-To run the application in browser make sure you have node installed (LTS, 16 used during development), clone this repo, run
+To run the application in browser make sure you have node installed (LTS, 16 used during development), clone this repo, run `npm install`
 
-```
-npm install
-```
+### Build
 
-and then
+Run `ng build vonage-app` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
 
-```
-ng serve --open
-```
+### Running unit tests
 
-to open the app in browser.
+Run `ng test vonage-app` to execute the unit tests via [Jest](https://jestjs.io).
 
-To run tests:
+Run `nx affected:test` to execute the unit tests affected by a change.
 
-```
-ng test
-```
+More Nx specific information in the Nx-README.md file.
 
 **What technologies / libraries / programming paradigms have you chosen? Why?**
 Angular, Typescript with Jest for Testing. Angular has a good modularity built in while keeping very well separated contextes. State management is handled with RxJS and Redux (NgRx) with the Observables, changes are detected on push.
 
-Karma and Jasmine are used for unit testing as support for Jest is not fully added for Angular 12.
+Jest used for unit testing.
 
 **Have you done any modeling / planning before coding? Please share that with us :)**
+I've started setting up the project with the technology stack I wanted to use. In the mean time I started to work to a UML like diagram with the classes that are described in the User Story. After setting up the project and starting to define some interfaces I saw the limitation of the setup, so I switched to another manager of workspaces which is a little more complicated but also more complete and rich of CLI commands to scaffold components (called Nx)[https://nx.dev].
