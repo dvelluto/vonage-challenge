@@ -49,6 +49,8 @@ Run `ng test vonage-app` to execute the unit tests via [Jest](https://jestjs.io)
 
 Run `nx affected:test` to execute the unit tests affected by a change.
 
+Run `nx run-many --all --target=test --codeCoverage` to execute all unit tests and generate code coverage
+
 More Nx specific information in the Nx-README.md file.
 
 **What technologies / libraries / programming paradigms have you chosen? Why?**

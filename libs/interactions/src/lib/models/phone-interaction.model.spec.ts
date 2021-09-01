@@ -1,4 +1,4 @@
-import { PhoneInteraction } from './phone-interaction.class';
+import { PhoneInteraction } from './phone-interaction.model';
 
 describe('phone-interaction tests', () => {
   it('should start the interaction and emit when resolve after 10s', () => {

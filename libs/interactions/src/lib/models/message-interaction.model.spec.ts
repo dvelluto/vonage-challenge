@@ -1,4 +1,4 @@
-import { MessageInteraction } from './message-interaction.class';
+import { MessageInteraction } from './message-interaction.model';
 
 describe('message-interaction tests', () => {
   it('should start the interaction and emit when resolve after 5s', () => {
