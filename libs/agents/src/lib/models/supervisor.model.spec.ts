@@ -27,6 +27,20 @@ describe('supervisor tests', () => {
       const result = supervisor.isBusy();
 
       // Assert
+      expect(result).toBeFalsy();
+    });
+
+    it('should return true when 2 message interaction in supervisor', () => {
+      // Arrange
+      const supervisor = new Supervisor();
+      const interaction = new MessageInteraction();
+
+      supervisor.activeInteractions = [interaction, interaction];
+
+      // Act
+      const result = supervisor.isBusy();
+
+      // Assert
       expect(result).toBeTruthy();
     });
 
@@ -79,6 +93,20 @@ describe('supervisor tests', () => {
       const interaction = new MessageInteraction();
 
       supervisor.activeInteractions = [interaction];
+
+      // Act
+      const result = supervisor.isAvailableForMessages();
+
+      // Assert
+      expect(result).toBeTruthy();
+    });
+
+    it('should return false when 2 message interaction in supervisor', () => {
+      // Arrange
+      const supervisor = new Supervisor();
+      const interaction = new MessageInteraction();
+
+      supervisor.activeInteractions = [interaction, interaction];
 
       // Act
       const result = supervisor.isAvailableForMessages();
