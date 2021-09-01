@@ -1,2 +1,2 @@
-export * from './message-interaction.class';
-export * from './phone-interaction.class';
+export * from './message-interaction.model';
+export * from './phone-interaction.model';

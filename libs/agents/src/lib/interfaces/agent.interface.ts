@@ -1,8 +1,6 @@
-import { Observable } from "rxjs";
-import { InteractionInterface } from '@libs/interactions';
+import { AgentTypes } from "../enums";
 
 export interface AgentInterface {
-  isBusy(): Observable<boolean>;
-  availableSlots<T extends InteractionInterface>(): Observable<number>;
-  resolveInteraction(interaction: InteractionInterface): Observable<boolean>;
+  id: string;
+  type: AgentTypes;
 }
