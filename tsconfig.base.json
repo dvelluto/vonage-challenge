@@ -16,6 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@libs/agents": ["libs/agents/src/index.ts"],
+      "@libs/contact-center": ["libs/contact-center/src/index.ts"],
       "@libs/interactions": ["libs/interactions/src/index.ts"]
     }
   },

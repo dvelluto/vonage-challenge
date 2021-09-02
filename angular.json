@@ -26,6 +26,31 @@
         }
       }
     },
+    "contact-center": {
+      "projectType": "library",
+      "root": "libs/contact-center",
+      "sourceRoot": "libs/contact-center/src",
+      "prefix": "contact-center",
+      "architect": {
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/contact-center"],
+          "options": {
+            "jestConfig": "libs/contact-center/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/contact-center/src/**/*.ts",
+              "libs/contact-center/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
     "interactions": {
       "projectType": "library",
       "root": "libs/interactions",
