@@ -22,7 +22,7 @@ describe('ContactCenterService', () => {
     // Arrange
     const agent = new Agent();
     const interaction = new PhoneInteraction();
-    service.agents = [agent];
+    service['agents'] = [agent];
 
     // Act
     service.queueNewInteraction(interaction);
@@ -39,7 +39,7 @@ describe('ContactCenterService', () => {
     const agentFree = new Agent();
     const interaction = new PhoneInteraction();
     const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy, agentFree];
+    service['agents'] = [agentBusy, agentFree];
 
     // Act
     service.queueNewInteraction(interaction);
@@ -57,7 +57,7 @@ describe('ContactCenterService', () => {
     const agentFree = new Agent();
     const interaction = new MessageInteraction();
     const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy, agentFree];
+    service['agents'] = [agentBusy, agentFree];
 
     // Act
     service.queueNewInteraction(interaction);
@@ -75,8 +75,8 @@ describe('ContactCenterService', () => {
     const supervisor = new Supervisor();
     const interaction = new MessageInteraction();
     const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy];
-    service.supervisors = [supervisor];
+    service['agents'] = [agentBusy];
+    service['supervisors'] = [supervisor];
 
     // Act
     service.queueNewInteraction(interaction);
@@ -96,8 +96,8 @@ describe('ContactCenterService', () => {
     const interaction = new PhoneInteraction();
     const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
     const supervisorBusyMock = jest.spyOn(supervisorBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy];
-    service.supervisors = [supervisorBusy, supervisor];
+    service['agents'] = [agentBusy];
+    service['supervisors'] = [supervisorBusy, supervisor];
 
     // Act
     service.queueNewInteraction(interaction);
@@ -118,9 +118,9 @@ describe('ContactCenterService', () => {
     const interaction = new PhoneInteraction();
     const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
     const supervisorBusyMock = jest.spyOn(supervisorBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy];
-    service.supervisors = [supervisorBusy];
-    service.managers = [manager];
+    service['agents'] = [agentBusy];
+    service['supervisors'] = [supervisorBusy];
+    service['managers'] = [manager];
 
     // Act
     service.queueNewInteraction(interaction);
@@ -141,9 +141,9 @@ describe('ContactCenterService', () => {
     const interaction = new MessageInteraction();
     const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
     const supervisorBusyMock = jest.spyOn(supervisorBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy];
-    service.supervisors = [supervisorBusy];
-    service.managers = [manager];
+    service['agents'] = [agentBusy];
+    service['supervisors'] = [supervisorBusy];
+    service['managers'] = [manager];
 
     // Act
     service.queueNewInteraction(interaction);
@@ -165,9 +165,9 @@ describe('ContactCenterService', () => {
     const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
     const supervisorBusyMock = jest.spyOn(supervisorBusy, 'isBusy').mockReturnValue(true)
     const managerBusyMock = jest.spyOn(managerBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy];
-    service.supervisors = [supervisorBusy];
-    service.managers = [managerBusy];
+    service['agents'] = [agentBusy];
+    service['supervisors'] = [supervisorBusy];
+    service['managers'] = [managerBusy];
 
     // Act
     service.queueNewInteraction(interaction);
@@ -182,7 +182,7 @@ describe('ContactCenterService', () => {
     // Arrange
     const unknownInteraction = { type: NaN } as InteractionInterface;
     const agentFree = new Agent();
-    service.agents = [agentFree];
+    service['agents'] = [agentFree];
     // Act
     service.queueNewInteraction(unknownInteraction);
 
@@ -190,11 +190,103 @@ describe('ContactCenterService', () => {
     expect(agentFree.isBusy()).toBeFalsy();
   });
 
+  it('should add a new Agent', () => {
+    // Arrange
+    const oldMaxSupervisors = service['maxSupervisors'];
+
+    // Act 
+    service.addAgents();
+
+    // Assert
+    expect(service['agents'].length).toEqual(1);
+    expect(service['maxSupervisors']).toBeGreaterThan(oldMaxSupervisors);
+  });
+
+  it('should remove an Agent', () => {
+    // Arrange
+    service.addAgents();
+    const oldMaxSupervisors = service['maxSupervisors'];
+
+    // Act 
+    service.addAgents(-1);
+
+    // Assert
+    expect(service['agents'].length).toEqual(0);
+    expect(service['maxSupervisors']).toBeLessThan(oldMaxSupervisors);
+  });
+
+  it('should add a new Supervisor', () => {
+    // Arrange
+    service.addAgents();
+
+    // Act 
+    service.addSupervisors();
+
+    // Assert
+    expect(service['supervisors'].length).toEqual(1);
+  });
+
+  it('should remove a Supervisor', () => {
+    // Arrange
+    service.addAgents();
+    service.addSupervisors();
+
+    // Act 
+    service.addSupervisors(-1);
+
+    // Assert
+    expect(service['supervisors'].length).toEqual(0);
+  });
+
+
+  it('should add a new Manager', () => {
+    // Arrange
+
+    // Act 
+    service.addManagers();
+
+    // Assert
+    expect(service['managers'].length).toEqual(1);
+  });
+
+  it('should remove a Manager', () => {
+    // Arrange
+
+    // Act 
+    service.addManagers(-1);
+
+    // Assert
+    expect(service['managers'].length).toEqual(0);
+  });
+
+  it('should remove a Supervisor if removing an Agent reduce the max number of supervisors', () => {
+    // Arrange
+    service.addAgents(2);
+    service.addSupervisors(2);
+
+    // Act
+    service.addAgents(-1);
+
+    // Assert
+    expect(service['supervisors'].length).toBeLessThan(2);
+  });
+
+  it('should not remove more Agents/Supervisors/Managers than available', () => {
+    // Arrange
+    service.addAgents(3);
+
+    // Act
+    service.addAgents(-4);
+
+    // Assert
+    expect(service['agents'].length).toEqual(0);
+  });
+
   it('should remove interaction when ended', () => {
     // Arrange
     const agent = new Agent();
     const interaction = new PhoneInteraction();
-    service.agents = [agent];
+    service['agents'] = [agent];
     service.queueNewInteraction(interaction);
 
     // Act

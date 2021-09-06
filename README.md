@@ -37,7 +37,17 @@ The contact center allocates the incoming interactions in a specific way.
 **How much time did you spend?**
 
 **How can we build your solution and run unit tests?**
-To run the application in browser make sure you have node installed (LTS, 16 used during development), clone this repo, run `npm install`
+
+To run the application in browser make sure you have node installed (LTS, 16 used during development), clone this repo, run `npm install`.
+
+#### Angular CLI
+
+To be able to use indipendently some of the feature provided by the CLI of Angular, please install globally the package from npm `npm install -g @angular/cli`. Thanks to that it's easier to run tests and build the application without using other scripts.
+
+#### Nx features
+
+To be able to use the nx features for running tests I suggest to install globally nx `npm install -g nx`. Nx will use a PowerShell script to load the application and tests. Remember to enable script execution in Powershell. To do so, open in administrator mode Powershell and launch
+`Set-ExecutionPolicy Unrestricted`.
 
 ### Build
 
@@ -45,11 +55,11 @@ Run `ng build vonage-app` to build the project. The build artifacts will be stor
 
 ### Running unit tests
 
-Run `ng test vonage-app` to execute the unit tests via [Jest](https://jestjs.io).
+Run `ng test vonage-app` to execute the unit tests via [Jest](https://jestjs.io). It can take also the library name for example `ng test contact-center`. Under the hood launches tests with nx script.
 
-Run `nx affected:test` to execute the unit tests affected by a change.
+Run `nx run {library/app-name}:test` to run the test with nx.
 
-Run `nx run-many --all --target=test --codeCoverage` to execute all unit tests and generate code coverage
+Run `nx run-many --all --target=test --codeCoverage` to execute all unit tests and generate code coverage for each library/app in the workspace. Coverage can be created also for specific library/app.
 
 More Nx specific information in the Nx-README.md file.
 
