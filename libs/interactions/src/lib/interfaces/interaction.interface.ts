@@ -1,10 +1,9 @@
-import { Observable } from "rxjs";
 import { InteractionTypes } from "../enums";
+import { InteractionStatus } from "./interaction-status.interface";
 
 export interface InteractionInterface {
   id: string;
   type: InteractionTypes;
   duration: number;
-  hasEnded(): Observable<boolean>;
-  start(): void;
+  status: InteractionStatus;
 }
