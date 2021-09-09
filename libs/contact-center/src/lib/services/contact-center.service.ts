@@ -1,8 +1,9 @@
 import { Injectable, OnDestroy } from '@angular/core';
-import { Agent, BaseAgent, Manager, Supervisor } from "@libs/agents";
-import { InteractionInterface, InteractionTypes } from '@libs/interactions';
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+
+import { Agent, AgentInterface, AgentsService, AgentTypes, BaseAgent, Manager, Supervisor } from "@libs/agents";
+import { InteractionInterface, InteractionsService, InteractionStatus, InteractionTypes } from '@libs/interactions';
 import { AgentsOnInteraction } from '../models';
 
 @Injectable({
@@ -10,142 +11,155 @@ import { AgentsOnInteraction } from '../models';
 })
 export class ContactCenterService implements OnDestroy {
 
-  private agents: Array<Agent> = [];
-  private supervisors: Array<Supervisor> = [];
-  private managers: Array<Manager> = [];
   private maxManagers = 1;
-  private maxSupervisors = this.agents.length;
-
-  private interactions = new BehaviorSubject<Array<InteractionInterface>>([]);
+  private maxSupervisors = this.agentsService.getAgents(AgentTypes.Agent).length;
 
   private agentsOnInteractions = new BehaviorSubject<AgentsOnInteraction>({});
 
   private subscriptions = new Subscription();
 
+  constructor(
+    public agentsService: AgentsService,
+    public interactionsService: InteractionsService) { }
 
-  ngOnDestroy() {
+  public ngOnDestroy() {
     this.subscriptions.unsubscribe();
   }
 
-  queueNewInteraction(interaction: InteractionInterface) {
+  public queueNewInteraction(interaction: InteractionInterface): boolean {
     const assigned = this.assignAgentToInteraction(interaction) ||
       this.assignSupervisorToInteraction(interaction) ||
       this.assignManagerToInteraction(interaction);
 
-    if (assigned) {
-      const actualInteractions = this.interactions.value;
-      this.interactions.next([...actualInteractions, interaction]);
-    }
+    return assigned;
   }
 
-  addAgents(nagents = 1) {
-    if (nagents > 0) {
-      this.agents = this.addBaseAgents<Agent>(nagents, this.agents, Agent);
-    }
+  public getActiveAgentsOnInteractions$(): Observable<Array<AgentInterface | undefined>> {
+    return this.agentsOnInteractions.asObservable().pipe(
+      map(p => Object.values(p)),
+      map(agentIds => agentIds.map(({ agentId }) => this.agentsService.getAgent(agentId)).filter(a => !!a)),
+    )
+  }
 
-    if (nagents < 0) {
-      this.agents = this.removeBaseAgents<Agent>(nagents, this.agents);
-    }
+  public addAgents(nagents = 1) {
+    this.agentsService.addAgents(nagents);
+    const agentsCount = this.agentsService.getAgents(AgentTypes.Agent).length;
+    const supervisorsCount = this.agentsService.getAgents(AgentTypes.Supervisor).length;
 
-    const shouldRemoveExtraSupervisors = this.agents.length < this.maxSupervisors &&
-      this.supervisors.length === this.maxSupervisors;
+    const shouldRemoveExtraSupervisors = agentsCount < this.maxSupervisors &&
+      supervisorsCount === this.maxSupervisors;
 
     if (shouldRemoveExtraSupervisors) {
-      const supervisorsToRemove = this.agents.length - this.maxSupervisors;
-      this.supervisors = this.removeBaseAgents<Supervisor>(supervisorsToRemove, this.supervisors);
+      const supervisorsToRemove = agentsCount - this.maxSupervisors;
+      this.agentsService.addSupervisors(supervisorsToRemove);
     }
-    this.maxSupervisors = this.agents.length;
+
+    this.maxSupervisors = agentsCount;
   }
 
-  addSupervisors(nsupervisors = 1) {
-    if (nsupervisors > 0 && this.supervisors.length + nsupervisors <= this.maxSupervisors) {
-      this.supervisors = this.addBaseAgents<Supervisor>(nsupervisors, this.supervisors, Supervisor);
-    }
-    if (nsupervisors < 0) {
-      this.supervisors = this.removeBaseAgents<Supervisor>(nsupervisors, this.supervisors);
-    }
-  }
+  public addSupervisors(nsupervisors = 1) {
+    const supervisorsCount = this.agentsService.getAgents(AgentTypes.Supervisor).length;
 
-  addManagers(nmanagers = 1) {
-    if (nmanagers > 0 && this.managers.length + nmanagers <= this.maxManagers) {
-      this.managers = this.addBaseAgents<Manager>(nmanagers, this.managers, Manager);
-    }
-    if (nmanagers < 0) {
-      this.managers = this.removeBaseAgents<Manager>(nmanagers, this.managers);
+    if (supervisorsCount + nsupervisors <= this.maxSupervisors) {
+      this.agentsService.addSupervisors(nsupervisors);
     }
   }
 
-  private addBaseAgents<T extends BaseAgent>(nagents: number, oldArray: Array<T>, agentClass: { new(): T; }): Array<T> {
-    let newAgents = [] as Array<T>;
-    for (let i = 0; i < nagents; i++) {
-      newAgents = [...newAgents, new agentClass()];
+  public addManagers(nmanagers = 1) {
+    const managersCount = this.agentsService.getAgents(AgentTypes.Manager).length;
+
+    if (managersCount + nmanagers <= this.maxManagers) {
+      this.agentsService.addManagers(nmanagers);
     }
-    return [...oldArray, ...newAgents];
   }
 
-  private removeBaseAgents<T extends BaseAgent>(nagents: number, oldArray: Array<T>): Array<T> {
-    const agentsToRemove = Math.abs(nagents);
-    const lastAgentIndex = agentsToRemove > oldArray.length ? - oldArray.length : nagents;
-    return oldArray.slice(0, lastAgentIndex);
+  public isAgentAvailableForMessages(agentId: string): boolean {
+    const agent = this.agentsService.getAgent(agentId);
+    if (!!agent) {
+      const { phoneInteractions, messageInteractions } = this.interactionsService.getInteractionsById(agent.idActiveInteractions);
+
+      return agent.maxMessageInteractions > messageInteractions.length && phoneInteractions.length === 0;
+    }
+    return false;
+  }
+
+  public isAgentAvailableForPhones(agentId: string): boolean {
+    const agent = this.agentsService.getAgent(agentId);
+    if (!!agent) {
+      const { phoneInteractions, messageInteractions } = this.interactionsService.getInteractionsById(agent.idActiveInteractions);
+
+      return agent.maxPhoneInteractions > phoneInteractions.length && messageInteractions.length === 0;
+    }
+    return false;
+  }
+
+  public isAgentBusy(agentId: string): boolean {
+    return !this.isAgentAvailableForMessages(agentId) && !this.isAgentAvailableForPhones(agentId);
+  }
+
+  private getAvailableAgents(agentType: AgentTypes): Array<BaseAgent> {
+    return this.agentsService.getAgents(agentType).filter(a => !this.isAgentBusy(a.id));
   }
 
   private assignAgentToInteraction(interaction: InteractionInterface): boolean {
-    return this.tentativeAssignInteraction(this.agents, interaction);
+    const availableAgents = this.getAvailableAgents(AgentTypes.Agent);
+    return !!availableAgents.length && this.tentativeAssignInteraction(availableAgents, interaction);
   }
 
   private assignSupervisorToInteraction(interaction: InteractionInterface): boolean {
-    return this.tentativeAssignInteraction(this.supervisors, interaction);
+    const availableSupervisors = this.getAvailableAgents(AgentTypes.Supervisor);
+    return !!availableSupervisors.length && this.tentativeAssignInteraction(availableSupervisors, interaction);
   }
 
   private assignManagerToInteraction(interaction: InteractionInterface): boolean {
-    return this.tentativeAssignInteraction(this.managers, interaction);
+    const availableManagers = this.getAvailableAgents(AgentTypes.Manager);
+    return !!availableManagers.length && this.tentativeAssignInteraction(availableManagers, interaction);
   }
 
 
-  private tentativeAssignInteraction(agentList: Array<BaseAgent>, interaction: InteractionInterface): boolean {
+  private tentativeAssignInteraction(agentList: Array<AgentInterface>, interaction: InteractionInterface): boolean {
     return !!agentList
-      .filter(a => !a.isBusy())
       .filter(a => this.isAgentAvailableForInteraction(a, interaction))
-      .reduce((prev: BaseAgent | undefined, availableAgent) => !prev && !!availableAgent ? this.assignInteraction(availableAgent, interaction) : prev, undefined);
+      .reduce((prev: AgentInterface | undefined, availableAgent) => !prev && !!availableAgent ? this.assignInteraction(availableAgent, interaction) : prev, undefined);
   }
 
-  private isAgentAvailableForInteraction(agent: BaseAgent, interaction: InteractionInterface) {
+  private isAgentAvailableForInteraction(agent: BaseAgent, interaction: InteractionInterface): boolean {
     switch (interaction.type) {
       case InteractionTypes.MessageInteraction:
-        return agent.isAvailableForMessages();
+        return this.isAgentAvailableForMessages(agent.id);
       case InteractionTypes.PhoneInteraction:
-        return agent.isAvailableForPhones();
+        return this.isAgentAvailableForPhones(agent.id);
       default:
         return false;
     }
   }
 
-  private assignInteraction(agent: BaseAgent, interaction: InteractionInterface): BaseAgent {
+  private assignInteraction(agent: AgentInterface, interaction: InteractionInterface): AgentInterface {
     const currentAssigned = this.agentsOnInteractions.value;
-    agent.activeInteractions = [interaction];
 
-    this.handleSubscriptionToEndOfInteraction(agent, interaction);
+    this.agentsService.addInteractionToAgent(agent.id, interaction.id);
 
-    this.agentsOnInteractions.next({ ...currentAssigned, [interaction.id]: { [agent.id]: agent.isBusy() } });
+    const interactionObserver = this.interactionsService.startInteraction(interaction);
 
+    const subscriberToInteraction = interactionObserver
+      .pipe(distinctUntilChanged())
+      .subscribe((status: InteractionStatus) => {
+        if (status.hasStarted) {
+          this.agentsOnInteractions.next({ ...currentAssigned, [interaction.id]: { agentId: agent.id } });
+          this.interactionsService.addInteractionToActive(interaction);
+        }
+
+        if (status.hasEnded) {
+          const { [interaction.id]: { agentId }, ...currentInteractions } = this.agentsOnInteractions.value;
+          this.agentsService.removeInteractionFromAgent(agentId, interaction.id);
+          this.agentsOnInteractions.next(currentInteractions);
+          subscriberToInteraction.unsubscribe();
+
+          this.subscriptions.remove(subscriberToInteraction);
+        }
+      });
+
+    this.subscriptions.add(subscriberToInteraction);
     return agent;
-  }
-
-  private handleSubscriptionToEndOfInteraction(agent: BaseAgent, interaction: InteractionInterface) {
-    const subscribeToEndInteraction: Subscription = interaction.hasEnded()
-      .pipe(filter(e => !!e))
-      .subscribe(hasEnded => this.onInteractionEnd(hasEnded, interaction, agent, subscribeToEndInteraction));
-
-    this.subscriptions.add(subscribeToEndInteraction);
-  }
-
-  private onInteractionEnd(response: boolean, interaction: InteractionInterface, agent: BaseAgent, subscription: Subscription) {
-    const { [interaction.id]: _, ...currentInteractions } = this.agentsOnInteractions.value;
-
-    agent.activeInteractions = agent.activeInteractions.filter(i => i.id == interaction.id);
-
-    this.agentsOnInteractions.next(currentInteractions);
-    subscription.unsubscribe();
-    this.subscriptions.remove(subscription);
   }
 }
