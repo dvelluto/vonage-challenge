@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { AgentTypes } from '@libs/agents';
 
 import { AgentsService } from './agents-service.service';
 
@@ -21,7 +22,7 @@ describe('AgentsService', () => {
     service.addAgents(1);
 
     // Assert
-    expect(service.getAgents("Agent").length).toEqual(1);
+    expect(service.getAgents(AgentTypes.Agent).length).toEqual(1);
   });
 
   it('should remove an Agent', () => {
@@ -32,7 +33,7 @@ describe('AgentsService', () => {
     service.addAgents(-1);
 
     // Assert
-    expect(service.getAgents("Agent").length).toEqual(0);
+    expect(service.getAgents(AgentTypes.Agent).length).toEqual(0);
   });
 
   it('should not add/remove an Agent if 0 requested', () => {
@@ -43,7 +44,7 @@ describe('AgentsService', () => {
     service.addAgents(0);
 
     // Assert
-    expect(service.getAgents("Agent").length).toEqual(1);
+    expect(service.getAgents(AgentTypes.Agent).length).toEqual(1);
   });
 
   it('should add a new Supervisor', () => {
@@ -53,7 +54,7 @@ describe('AgentsService', () => {
     service.addSupervisors(1);
 
     // Assert
-    expect(service.getAgents("Supervisor").length).toEqual(1);
+    expect(service.getAgents(AgentTypes.Supervisor).length).toEqual(1);
   });
 
   it('should remove a Supervisor', () => {
@@ -64,7 +65,7 @@ describe('AgentsService', () => {
     service.addSupervisors(-1);
 
     // Assert
-    expect(service.getAgents("Supervisor").length).toEqual(0);
+    expect(service.getAgents(AgentTypes.Supervisor).length).toEqual(0);
   });
 
   it('should not add/remove a Supervisor if 0 requested', () => {
@@ -75,7 +76,7 @@ describe('AgentsService', () => {
     service.addSupervisors(0);
 
     // Assert
-    expect(service.getAgents("Supervisor").length).toEqual(1);
+    expect(service.getAgents(AgentTypes.Supervisor).length).toEqual(1);
   });
 
   it('should add a new Manager', () => {
@@ -85,7 +86,7 @@ describe('AgentsService', () => {
     service.addManagers(1);
 
     // Assert
-    expect(service.getAgents("Manager").length).toEqual(1);
+    expect(service.getAgents(AgentTypes.Manager).length).toEqual(1);
   });
 
   it('should remove a Manager', () => {
@@ -96,7 +97,7 @@ describe('AgentsService', () => {
     service.addManagers(-1);
 
     // Assert
-    expect(service.getAgents("Manager").length).toEqual(0);
+    expect(service.getAgents(AgentTypes.Manager).length).toEqual(0);
   });
 
   it('should not add/remove a Manager if 0 requested', () => {
@@ -107,7 +108,7 @@ describe('AgentsService', () => {
     service.addManagers(0);
 
     // Assert
-    expect(service.getAgents("Manager").length).toEqual(1);
+    expect(service.getAgents(AgentTypes.Manager).length).toEqual(1);
   });
 
   it('should remove all BaseAgents if a number > available Agents is passed', () => {
@@ -120,7 +121,7 @@ describe('AgentsService', () => {
     service.addAgents(- requiredRemoved);
 
     // Assert
-    expect(service.getAgents("Agent").length).toEqual(0);
+    expect(service.getAgents(AgentTypes.Agent).length).toEqual(0);
   });
 
   it('should get the list of available Agents', () => {
@@ -128,7 +129,7 @@ describe('AgentsService', () => {
     service.addAgents(2);
 
     // Act
-    const result = service.getAgents("Agent");
+    const result = service.getAgents(AgentTypes.Agent);
 
     // Assert
     expect(result.length).toEqual(2);
@@ -139,7 +140,7 @@ describe('AgentsService', () => {
     service.addSupervisors(2);
 
     // Act
-    const result = service.getAgents("Supervisor");
+    const result = service.getAgents(AgentTypes.Supervisor);
 
     // Assert
     expect(result.length).toEqual(2);
@@ -150,7 +151,7 @@ describe('AgentsService', () => {
     service.addManagers(2);
 
     // Act
-    const result = service.getAgents("Manager");
+    const result = service.getAgents(AgentTypes.Manager);
 
     // Assert
     expect(result.length).toEqual(2);
@@ -159,7 +160,7 @@ describe('AgentsService', () => {
   it('should get an Agent by ID', () => {
     // Arrange
     service.addAgents(2);
-    const testAgent = service.getAgents("Agent")[0];
+    const testAgent = service.getAgents(AgentTypes.Agent)[0];
 
     // Act
     const result = service.getAgent(testAgent.id);
@@ -171,7 +172,7 @@ describe('AgentsService', () => {
   it('should get a Supervisor by ID', () => {
     // Arrange
     service.addSupervisors(2);
-    const testSupervisor = service.getAgents("Supervisor")[0];
+    const testSupervisor = service.getAgents(AgentTypes.Supervisor)[0];
 
     // Act
     const result = service.getAgent(testSupervisor.id);
@@ -183,7 +184,7 @@ describe('AgentsService', () => {
   it('should get a Manager by ID', () => {
     // Arrange
     service.addManagers(2);
-    const testManager = service.getAgents("Manager")[0];
+    const testManager = service.getAgents(AgentTypes.Manager)[0];
 
     // Act
     const result = service.getAgent(testManager.id);
@@ -207,7 +208,7 @@ describe('AgentsService', () => {
     // Arrange
     const interactionId = "testId";
     service.addAgents(1);
-    const testAgent = service.getAgents("Agent")[0];
+    const testAgent = service.getAgents(AgentTypes.Agent)[0];
 
     // Act
     service.addInteractionToAgent(testAgent.id, interactionId);
@@ -220,7 +221,7 @@ describe('AgentsService', () => {
     // Arrange
     const interactionId = "testId";
     service.addAgents(1);
-    const testAgent = service.getAgents("Agent")[0];
+    const testAgent = service.getAgents(AgentTypes.Agent)[0];
     service.addInteractionToAgent(testAgent.id, interactionId);
 
     // Act
@@ -239,14 +240,14 @@ describe('AgentsService', () => {
     service.addInteractionToAgent("unknown", interactionId);
 
     // Assert
-    expect(service.getAgents("Agent").some(a => a.idActiveInteractions.includes(interactionId))).toBeFalsy();
+    expect(service.getAgents(AgentTypes.Agent).some(a => a.idActiveInteractions.includes(interactionId))).toBeFalsy();
   });
 
   it('should not remove an interaction id from an unknown agent', () => {
     // Arrange
     const interactionId = "testId";
     service.addAgents(1);
-    const testAgent = service.getAgents("Agent")[0];
+    const testAgent = service.getAgents(AgentTypes.Agent)[0];
     service.addInteractionToAgent(testAgent.id, interactionId);
 
     // Act

@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Agent, BaseAgent, Manager, Supervisor } from '../models';
+
+import { AgentInterface, AgentTypes } from '@libs/agents';
+import { Agent, Manager, Supervisor } from '../models';
 
 @Injectable({
   providedIn: 'root'
@@ -9,19 +11,19 @@ export class AgentsService {
   private supervisors: Array<Supervisor> = [];
   private managers: Array<Manager> = [];
 
-  public getAgent(agentId: string): BaseAgent | undefined {
+  public getAgent(agentId: string): AgentInterface | undefined {
     return this.agents.find(a => a.id === agentId) ||
       this.supervisors.find(s => s.id === agentId) ||
       this.managers.find(m => m.id === agentId);
   }
 
-  public getAgents(agentType: "Agent" | "Supervisor" | "Manager"): Array<BaseAgent> {
+  public getAgents(agentType: AgentTypes): Array<AgentInterface> {
     switch (agentType) {
-      case "Agent":
+      case AgentTypes.Agent:
         return this.agents;
-      case "Supervisor":
+      case AgentTypes.Supervisor:
         return this.supervisors;
-      case "Manager":
+      case AgentTypes.Manager:
         return this.managers;
     }
   }
@@ -68,7 +70,7 @@ export class AgentsService {
     }
   }
 
-  private addBaseAgents<T extends BaseAgent>(nagents: number, oldArray: Array<T>, agentClass: { new(): T; }): Array<T> {
+  private addBaseAgents<T extends AgentInterface>(nagents: number, oldArray: Array<T>, agentClass: { new(): T; }): Array<T> {
     let newAgents = [] as Array<T>;
     for (let i = 0; i < nagents; i++) {
       newAgents = [...newAgents, new agentClass()];
@@ -76,7 +78,7 @@ export class AgentsService {
     return [...oldArray, ...newAgents];
   }
 
-  private removeBaseAgents<T extends BaseAgent>(nagents: number, oldArray: Array<T>): Array<T> {
+  private removeBaseAgents<T extends AgentInterface>(nagents: number, oldArray: Array<T>): Array<T> {
     const agentsToRemove = Math.abs(nagents);
     const lastAgentIndex = agentsToRemove > oldArray.length ? - oldArray.length : nagents;
     return oldArray.slice(0, lastAgentIndex);

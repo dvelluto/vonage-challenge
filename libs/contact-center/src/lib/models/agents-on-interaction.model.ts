@@ -1,1 +1,1 @@
-export type AgentsOnInteraction = { [interactionid: string]: { [agent: string]: boolean } };
+export type AgentsOnInteraction = { [interactionId: string]: { agentId: string } };
