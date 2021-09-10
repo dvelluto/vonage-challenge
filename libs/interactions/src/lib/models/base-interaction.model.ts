@@ -8,7 +8,7 @@ export abstract class BaseInteraction implements InteractionInterface {
   public status: InteractionStatus;
 
   constructor() {
-    this.id = Date.now().toString();
+    this.id = Date.now() + Math.random().toString(36).substr(2, 9);
     this.status = { hasStarted: false, hasEnded: false };
   }
 }

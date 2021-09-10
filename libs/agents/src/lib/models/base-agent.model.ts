@@ -9,6 +9,6 @@ export abstract class BaseAgent implements AgentInterface {
   public abstract maxMessageInteractions: number;
 
   constructor() {
-    this.id = Date.now().toString();
+    this.id = Date.now() + Math.random().toString(36).substr(2, 9);
   }
 }
