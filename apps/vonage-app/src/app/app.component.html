@@ -1,49 +1,104 @@
-<div class="columns is-mobile is-centered">
-  <div class="column is-half">
-    <section class="section">
-      <div class="container">
-        <h1 class="title is-1">Vonage Challenge</h1>
-        <h2 class="subtitle">Application demo</h2>
-      </div>
-    </section>
-    <section class="section">
-      <div class="columns">
-        <div class="column">
-          <div class="container">
-            <h3 class="title is-3">Agents</h3>
-            <h4 class="subtitle">Total: {{ agents$ | async }}</h4>
-            <h4 class="subtitle">Active: {{ activeAgents$ | async }}</h4>
-            <div class="buttons">
-              <button class="button is-success" (click)="addAgent()">Add</button>
-              <button class="button is-danger" (click)="removeAgent()">Remove</button>
-            </div>
-          </div>
-        </div>
+<div class="container is-widescreen">
 
-        <div class="column">
-          <div class="container">
-            <h3 class="title is-3">Supervisors</h3>
-            <h4 class="subtitle">Total: {{ supervisors$ | async }}</h4>
-            <h4 class="subtitle">Active: {{ activeSupervisors$ | async }}</h4>
-            <div class="buttons">
-              <button class="button is-success" (click)="addSupervisor()">Add</button>
-              <button class="button is-danger" (click)="removeSupervisor()">Remove</button>
+  <div class="columns is-centered">
+    <div class="column">
+      <section class="section">
+        <div class="container">
+          <h1 class="title is-1">Vonage Challenge</h1>
+          <h2 class="subtitle">Application demo</h2>
+        </div>
+      </section>
+      <section class="section">
+        <div class="columns">
+          <div class="column">
+            <div class="container">
+              <h3 class="title is-3">Agents</h3>
+              <h4 class="subtitle">Total: {{ agents$ | async }}</h4>
+              <h4 class="subtitle">Active: {{ activeAgents$ | async }}</h4>
+              <div class="buttons">
+                <button class="button is-success" (click)="addAgent()">Add</button>
+                <button class="button is-danger" (click)="removeAgent()">Remove</button>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="column">
-          <div class="container">
-            <h3 class="title is-3">Managers</h3>
-            <h4 class="subtitle">Total: {{ managers$ | async }}</h4>
-            <h4 class="subtitle">Active: {{ activeManagers$ | async }}</h4>
-            <div class="buttons">
-              <button class="button is-success" (click)="addManager()">Add</button>
-              <button class="button is-danger" (click)="removeManager()">Remove</button>
+          <div class="column">
+            <div class="container">
+              <h3 class="title is-3">Supervisors</h3>
+              <h4 class="subtitle">Total: {{ supervisors$ | async }}</h4>
+              <h4 class="subtitle">Active: {{ activeSupervisors$ | async }}</h4>
+              <div class="buttons">
+                <button class="button is-success" (click)="addSupervisor()">Add</button>
+                <button class="button is-danger" (click)="removeSupervisor()">Remove</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="column">
+            <div class="container">
+              <h3 class="title is-3">Managers</h3>
+              <h4 class="subtitle">Total: {{ managers$ | async }}</h4>
+              <h4 class="subtitle">Active: {{ activeManagers$ | async }}</h4>
+              <div class="buttons">
+                <button class="button is-success" (click)="addManager()">Add</button>
+                <button class="button is-danger" (click)="removeManager()">Remove</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section class="section">
+        <div class="container">
+          <h3 class="title is-3">Interactions</h3>
+          <div class="buttons">
+            <button class="button is-info" (click)="addPhoneInteractionToQueue()">Add Phone Interaction</button>
+            <button class="button is-warning" (click)="addMessageInteractionToQueue()">Add Message
+              Interaction</button>
+          </div>
+          <div class="columns">
+            <div class="column">
+
+            </div>
+          </div>
+          <div class="columns">
+            <div class="column">
+              <h3 class="title is-3">Queued Interactions</h3>
+              <ul>
+                <li *ngFor="let queued of queuedInteractions$ | async">{{ queued.type.slice(0, -12) }} - {{ queued.id }}
+                </li>
+              </ul>
+            </div>
+            <div class="column">
+              <h3 class="title is-3">Handled Interactions</h3>
+              <ul>
+                <li *ngFor="let handled of handledInteractions$ | async">{{ handled.type.slice(0, -12) }} - {{
+                  handled.id }}
+                </li>
+              </ul>
+            </div>
+            <div class="column">
+              <h3 class="title is-3">In processing</h3>
+              <ul>
+                <li *ngFor="let inProcess of inProcessing$ | async">{{ inProcess.type.slice(0, -12) }} - {{ inProcess.id
+                  }}
+                </li>
+              </ul>
+            </div>
+            <div class="column">
+              <h3 class="title is-3">Discarded</h3>
+              <ul>
+                <li *ngFor="let discarded of discardedInteractions$ | async">{{ discarded.type.slice(0, -12) }} - {{
+                  discarded.id }}</li>
+              </ul>
+            </div>
+          </div>
+
+
+
+
+        </div>
+      </section>
+    </div>
   </div>
 </div>
