@@ -17,14 +17,14 @@ export class InteractionsService {
     return interactionSubject.asObservable().pipe(
       switchMap(status =>
         iif(() => !status.hasStarted,
-          of(status).pipe(tap(() => interactionSubject.next({ ...status, hasStarted: true }))),
+          of(status).pipe(
+            tap(() => interactionSubject.next(this.setStatus(interaction, { ...status, hasStarted: true })))),
           of(status).pipe(
             delay(interaction.duration * 1000),
-            tap(() => interactionSubject.next({ ...status, hasEnded: true }))
+            tap(() => interactionSubject.next(this.setStatus(interaction, { ...status, hasEnded: true })))
           )
         )
-      ),
-      takeUntil(interactionSubject.asObservable().pipe(map(status => status.hasStarted && status.hasEnded)))
+      )
     )
   }
 
@@ -53,5 +53,10 @@ export class InteractionsService {
       [InteractionTypes.PhoneInteraction]: phoneInteractions,
       [InteractionTypes.MessageInteraction]: messageInteractions
     };
+  }
+
+  private setStatus(interaction: InteractionInterface, status: InteractionStatus): InteractionStatus {
+    interaction.status = status;
+    return interaction.status;
   }
 }

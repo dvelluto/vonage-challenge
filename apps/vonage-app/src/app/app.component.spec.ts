@@ -1,10 +1,15 @@
 import { TestBed } from '@angular/core/testing';
+import { AgentsModule } from '@libs/agents';
+import { ContactCenterModule, ContactCenterService } from '@libs/contact-center';
+import { InteractionsModule } from '@libs/interactions';
 import { AppComponent } from './app.component';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
+      imports: [AgentsModule, InteractionsModule, ContactCenterModule],
       declarations: [AppComponent],
+      providers: [ContactCenterService]
     }).compileComponents();
   });
 
@@ -18,14 +23,5 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app.title).toEqual('vonage-app');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain(
-      'Welcome to vonage-app!'
-    );
   });
 });

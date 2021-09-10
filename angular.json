@@ -9,7 +9,9 @@
       "architect": {
         "test": {
           "builder": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/agents"],
+          "outputs": [
+            "coverage/libs/agents"
+          ],
           "options": {
             "jestConfig": "libs/agents/jest.config.js",
             "passWithNoTests": true
@@ -34,7 +36,9 @@
       "architect": {
         "test": {
           "builder": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/contact-center"],
+          "outputs": [
+            "coverage/libs/contact-center"
+          ],
           "options": {
             "jestConfig": "libs/contact-center/jest.config.js",
             "passWithNoTests": true
@@ -59,7 +63,9 @@
       "architect": {
         "test": {
           "builder": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/interactions"],
+          "outputs": [
+            "coverage/libs/interactions"
+          ],
           "options": {
             "jestConfig": "libs/interactions/jest.config.js",
             "passWithNoTests": true
@@ -84,7 +90,9 @@
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
-          "outputs": ["{options.outputPath}"],
+          "outputs": [
+            "{options.outputPath}"
+          ],
           "options": {
             "outputPath": "dist/apps/vonage-app",
             "index": "apps/vonage-app/src/index.html",
@@ -95,7 +103,10 @@
               "apps/vonage-app/src/favicon.ico",
               "apps/vonage-app/src/assets"
             ],
-            "styles": ["apps/vonage-app/src/styles.css"],
+            "styles": [
+              "node_modules/bulma/css/bulma.css",
+              "apps/vonage-app/src/styles.css"
+            ],
             "scripts": []
           },
           "configurations": {
@@ -160,7 +171,9 @@
         },
         "test": {
           "builder": "@nrwl/jest:jest",
-          "outputs": ["coverage/apps/vonage-app"],
+          "outputs": [
+            "coverage/apps/vonage-app"
+          ],
           "options": {
             "jestConfig": "apps/vonage-app/jest.config.js",
             "passWithNoTests": true
@@ -189,7 +202,9 @@
         "lint": {
           "builder": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["apps/vonage-app-e2e/**/*.{js,ts}"]
+            "lintFilePatterns": [
+              "apps/vonage-app-e2e/**/*.{js,ts}"
+            ]
           }
         }
       }
