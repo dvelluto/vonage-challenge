@@ -1,8 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { Agent, Manager, Supervisor } from '@libs/agents';
-import { InteractionInterface, MessageInteraction, PhoneInteraction } from '@libs/interactions';
-import { pipe } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { AgentsModule, AgentTypes } from '@libs/agents';
+import { InteractionsModule, MessageInteraction, PhoneInteraction } from '@libs/interactions';
 
 import { ContactCenterService } from './contact-center.service';
 
@@ -10,7 +8,13 @@ describe('ContactCenterService', () => {
   let service: ContactCenterService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      imports: [
+        AgentsModule,
+        InteractionsModule
+      ],
+      providers: [ContactCenterService]
+    });
     service = TestBed.inject(ContactCenterService);
   });
 
@@ -20,193 +24,207 @@ describe('ContactCenterService', () => {
 
   it('should assign a phone interaction to the first available agent', () => {
     // Arrange
-    const agent = new Agent();
     const interaction = new PhoneInteraction();
-    service.agents = [agent];
+    service.addAgents(1);
+    const testAgent = service.agentsService.getAgents(AgentTypes.Agent)[0];
 
     // Act
-    service.queueNewInteraction(interaction);
+    const result = service.queueNewInteraction(interaction);
 
     // Assert
-    expect(agent.isBusy()).toBeTruthy();
-    expect(agent.isAvailableForPhones()).toBeFalsy();
-    expect(agent.isAvailableForMessages()).toBeFalsy();
+    expect(result).toBeTruthy();
+    expect(service.isAgentAvailableForPhones(testAgent.id)).toBeFalsy();
   })
 
   it('should assign a phone interaction to the next available agent', () => {
     // Arrange
-    const agentBusy = new Agent();
-    const agentFree = new Agent();
+    service.addAgents(2);
+    const agentBusy = service.agentsService.getAgents(AgentTypes.Agent)[0];
+    agentBusy.maxPhoneInteractions = 0;
+    agentBusy.maxMessageInteractions = 0;
+    const agentFree = service.agentsService.getAgents(AgentTypes.Agent)[1];
     const interaction = new PhoneInteraction();
-    const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy, agentFree];
+
 
     // Act
-    service.queueNewInteraction(interaction);
+    const result = service.queueNewInteraction(interaction);
 
     // Assert
-    expect(agentBusyMock).toHaveBeenCalled();
-    expect(agentFree.isBusy()).toBeTruthy();
-    expect(agentFree.isAvailableForPhones()).toBeFalsy();
-    expect(agentFree.isAvailableForMessages()).toBeFalsy();
+    expect(result).toBeTruthy();
+    expect(service.isAgentAvailableForPhones(agentBusy.id)).toBeFalsy();
+    expect(service.isAgentAvailableForPhones(agentFree.id)).toBeFalsy();
   })
 
   it('should assign a message interaction to the next available agent', () => {
     // Arrange
-    const agentBusy = new Agent();
-    const agentFree = new Agent();
+    service.addAgents(2);
+    const agentBusy = service.agentsService.getAgents(AgentTypes.Agent)[0];
+    agentBusy.maxMessageInteractions = 0;
+    agentBusy.maxPhoneInteractions = 0;
+    const agentFree = service.agentsService.getAgents(AgentTypes.Agent)[1];
     const interaction = new MessageInteraction();
-    const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy, agentFree];
+
 
     // Act
-    service.queueNewInteraction(interaction);
+    const result = service.queueNewInteraction(interaction);
 
     // Assert
-    expect(agentBusyMock).toHaveBeenCalled();
-    expect(agentFree.isBusy()).toBeFalsy();
-    expect(agentFree.isAvailableForPhones()).toBeFalsy();
-    expect(agentFree.isAvailableForMessages()).toBeTruthy();
+    expect(result).toBeTruthy();
+    expect(service.isAgentAvailableForMessages(agentBusy.id)).toBeFalsy();
+    expect(service.isAgentAvailableForPhones(agentFree.id)).toBeFalsy();
+    expect(service.isAgentAvailableForMessages(agentFree.id)).toBeTruthy();
   })
 
   it('should assign a message interaction to the next available supervisor', () => {
     // Arrange
-    const agentBusy = new Agent();
-    const supervisor = new Supervisor();
+    service.agentsService.addSupervisors(1);
+    const supervisorFree = service.agentsService.getAgents(AgentTypes.Supervisor)[0];
     const interaction = new MessageInteraction();
-    const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy];
-    service.supervisors = [supervisor];
+
 
     // Act
-    service.queueNewInteraction(interaction);
+    const result = service.queueNewInteraction(interaction);
 
     // Assert
-    expect(agentBusyMock).toHaveBeenCalled();
-    expect(supervisor.isBusy()).toBeFalsy();
-    expect(supervisor.isAvailableForPhones()).toBeFalsy();
-    expect(supervisor.isAvailableForMessages()).toBeTruthy();
+    expect(result).toBeTruthy();
+    expect(service.isAgentAvailableForPhones(supervisorFree.id)).toBeFalsy();
+    expect(service.isAgentAvailableForMessages(supervisorFree.id)).toBeTruthy();
   })
 
-  it('should assign a phone interaction to the next available supervisor', () => {
-    // Arrange
-    const agentBusy = new Agent();
-    const supervisorBusy = new Supervisor();
-    const supervisor = new Supervisor();
-    const interaction = new PhoneInteraction();
-    const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
-    const supervisorBusyMock = jest.spyOn(supervisorBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy];
-    service.supervisors = [supervisorBusy, supervisor];
-
-    // Act
-    service.queueNewInteraction(interaction);
-
-    // Assert
-    expect(agentBusyMock).toHaveBeenCalled();
-    expect(supervisorBusyMock).toHaveBeenCalled();
-    expect(supervisor.isBusy()).toBeTruthy();
-    expect(supervisor.isAvailableForPhones()).toBeFalsy();
-    expect(supervisor.isAvailableForMessages()).toBeFalsy();
-  })
 
   it('should assign a phone interaction to the manager if available', () => {
     // Arrange
-    const agentBusy = new Agent();
-    const supervisorBusy = new Supervisor();
-    const manager = new Manager();
+    service.agentsService.addManagers(1);
+    const managerFree = service.agentsService.getAgents(AgentTypes.Manager)[0];
     const interaction = new PhoneInteraction();
-    const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
-    const supervisorBusyMock = jest.spyOn(supervisorBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy];
-    service.supervisors = [supervisorBusy];
-    service.managers = [manager];
 
     // Act
-    service.queueNewInteraction(interaction);
+    const result = service.queueNewInteraction(interaction);
 
     // Assert
-    expect(agentBusyMock).toHaveBeenCalled();
-    expect(supervisorBusyMock).toHaveBeenCalled();
-    expect(manager.isBusy()).toBeTruthy();
-    expect(manager.isAvailableForPhones()).toBeFalsy();
-    expect(manager.isAvailableForMessages()).toBeFalsy();
+    expect(result).toBeTruthy();
+    expect(service.isAgentAvailableForPhones(managerFree.id)).toBeFalsy();
+    expect(service.isAgentAvailableForMessages(managerFree.id)).toBeFalsy();
   })
 
-  it('should assign a message interaction to the manager if available', () => {
-    // Arrange
-    const agentBusy = new Agent();
-    const supervisorBusy = new Supervisor();
-    const manager = new Manager();
-    const interaction = new MessageInteraction();
-    const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
-    const supervisorBusyMock = jest.spyOn(supervisorBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy];
-    service.supervisors = [supervisorBusy];
-    service.managers = [manager];
-
-    // Act
-    service.queueNewInteraction(interaction);
-
-    // Assert
-    expect(agentBusyMock).toHaveBeenCalled();
-    expect(supervisorBusyMock).toHaveBeenCalled();
-    expect(manager.isBusy()).toBeTruthy();
-    expect(manager.isAvailableForPhones()).toBeFalsy();
-    expect(manager.isAvailableForMessages()).toBeFalsy();
-  })
 
   it('should discard the interaction if no one is available', () => {
     // Arrange
-    const agentBusy = new Agent();
-    const supervisorBusy = new Supervisor();
-    const managerBusy = new Manager();
     const interaction = new MessageInteraction();
-    const agentBusyMock = jest.spyOn(agentBusy, 'isBusy').mockReturnValue(true)
-    const supervisorBusyMock = jest.spyOn(supervisorBusy, 'isBusy').mockReturnValue(true)
-    const managerBusyMock = jest.spyOn(managerBusy, 'isBusy').mockReturnValue(true)
-    service.agents = [agentBusy];
-    service.supervisors = [supervisorBusy];
-    service.managers = [managerBusy];
 
     // Act
-    service.queueNewInteraction(interaction);
+    const result = service.queueNewInteraction(interaction);
 
     // Assert
-    expect(agentBusyMock).toHaveBeenCalled();
-    expect(supervisorBusyMock).toHaveBeenCalled();
-    expect(managerBusyMock).toHaveBeenCalled();
+    expect(result).toBeFalsy();
   })
 
-  it('should discard an interaction not handlable by agents', () => {
+  it('should add a new Agent', () => {
     // Arrange
-    const unknownInteraction = { type: NaN } as InteractionInterface;
-    const agentFree = new Agent();
-    service.agents = [agentFree];
-    // Act
-    service.queueNewInteraction(unknownInteraction);
+    const oldMaxSupervisors = service['maxSupervisors'];
+
+    // Act 
+    service.addAgents();
 
     // Assert
-    expect(agentFree.isBusy()).toBeFalsy();
+    expect(service.agentsService.getAgents(AgentTypes.Agent).length).toEqual(1);
+    expect(service['maxSupervisors']).toBeGreaterThan(oldMaxSupervisors);
+  });
+
+  it('should remove an Agent', () => {
+    // Arrange
+    service.addAgents();
+    const oldMaxSupervisors = service['maxSupervisors'];
+
+    // Act 
+    service.addAgents(-1);
+
+    // Assert
+    expect(service.agentsService.getAgents(AgentTypes.Agent).length).toEqual(0);
+    expect(service['maxSupervisors']).toBeLessThan(oldMaxSupervisors);
+  });
+
+  it('should add a new Supervisor', () => {
+    // Arrange
+    service.addAgents();
+
+    // Act 
+    service.addSupervisors();
+
+    // Assert
+    expect(service.agentsService.getAgents(AgentTypes.Supervisor).length).toEqual(1);
+  });
+
+  it('should remove a Supervisor', () => {
+    // Arrange
+    service.addAgents();
+    service.addSupervisors();
+
+    // Act 
+    service.addSupervisors(-1);
+
+    // Assert
+    expect(service.agentsService.getAgents(AgentTypes.Supervisor).length).toEqual(0);
+  });
+
+
+  it('should add a new Manager', () => {
+    // Arrange
+
+    // Act 
+    service.addManagers();
+
+    // Assert
+    expect(service.agentsService.getAgents(AgentTypes.Manager).length).toEqual(1);
+  });
+
+  it('should remove a Manager', () => {
+    // Arrange
+    service.addManagers(1);
+
+    // Act 
+    service.addManagers(-1);
+
+    // Assert
+    expect(service.agentsService.getAgents(AgentTypes.Manager).length).toEqual(0);
+
+  });
+
+  it('should remove a Supervisor if removing an Agent reduce the max number of supervisors', () => {
+    // Arrange
+    service.addAgents(2);
+    service.addSupervisors(2);
+
+    // Act
+    service.addAgents(-1);
+
+    // Assert
+    expect(service.agentsService.getAgents(AgentTypes.Supervisor).length).toEqual(1);
+  });
+
+  it('should not remove more Agents/Supervisors/Managers than available', () => {
+    // Arrange
+    service.addAgents(3);
+
+    // Act
+    service.addAgents(-4);
+
+    // Assert
+    expect(service.agentsService.getAgents(AgentTypes.Agent).length).toEqual(0);
+
   });
 
   it('should remove interaction when ended', () => {
     // Arrange
-    const agent = new Agent();
     const interaction = new PhoneInteraction();
-    service.agents = [agent];
-    service.queueNewInteraction(interaction);
+    service.addAgents(1);
+    const agent = service.agentsService.getAgents(AgentTypes.Agent)[0];
 
     // Act
-    interaction.start();
+    const result = service.queueNewInteraction(interaction);
 
     // Assert
-    interaction.hasEnded().pipe(filter(e => !!e)).subscribe(_ => {
-
-      expect(agent.isBusy()).toBeFalsy();
-      expect(agent.isAvailableForPhones()).toBeTruthy();
-      expect(agent.isAvailableForMessages()).toBeTruthy();
-    });
+    expect(result).toBeTruthy();
   });
 
   it('should unsubscribe on ngOnDestroy', () => {
@@ -217,4 +235,20 @@ describe('ContactCenterService', () => {
 
     // Assert
   });
+
+  it('should getCurrentAgents assigned to interactions', () => {
+    // Arrange
+    const interaction = new PhoneInteraction();
+    service.addAgents(2);
+
+    // Act
+    service.queueNewInteraction(interaction);
+
+    // Assert
+    const subscriber = service.getActiveAgentsOnInteractions$().subscribe(
+      (activeAgents) => {
+        expect(activeAgents.length).toEqual(1);
+      }
+    );
+  })
 });

@@ -1,4 +1,4 @@
 export enum InteractionTypes {
-  PhoneInteraction,
-  MessageInteraction
+  PhoneInteraction = "phoneInteractions",
+  MessageInteraction = "messageInteractions"
 }
