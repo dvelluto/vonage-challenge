@@ -7,7 +7,11 @@ describe('InteractionsServiceService', () => {
   let service: InteractionsService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [
+        InteractionsService
+      ]
+    });
     service = TestBed.inject(InteractionsService);
   });
 
@@ -61,7 +65,7 @@ describe('InteractionsServiceService', () => {
     const phoneInteraction = new PhoneInteraction();
 
     // Act
-    const result = service.startInteraction(phoneInteraction);
+    const result = service.startInteraction$(phoneInteraction);
 
     // Assert
     const subscriber = result.subscribe((status: InteractionStatus) => {

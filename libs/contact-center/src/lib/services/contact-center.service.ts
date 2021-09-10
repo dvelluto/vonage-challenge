@@ -1,14 +1,12 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
-import { Agent, AgentInterface, AgentsService, AgentTypes, BaseAgent, Manager, Supervisor } from "@libs/agents";
+import { AgentInterface, AgentsService, AgentTypes, BaseAgent, Manager, Supervisor } from "@libs/agents";
 import { InteractionInterface, InteractionsService, InteractionStatus, InteractionTypes } from '@libs/interactions';
 import { AgentsOnInteraction } from '../models';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class ContactCenterService implements OnDestroy {
 
   private maxManagers = 1;
@@ -27,9 +25,9 @@ export class ContactCenterService implements OnDestroy {
   }
 
   public queueNewInteraction(interaction: InteractionInterface): boolean {
-    const assigned = this.assignAgentToInteraction(interaction) ||
-      this.assignSupervisorToInteraction(interaction) ||
-      this.assignManagerToInteraction(interaction);
+    const assigned = this.assignAgentToInteraction(interaction, AgentTypes.Agent) ||
+      this.assignAgentToInteraction(interaction, AgentTypes.Supervisor) ||
+      this.assignAgentToInteraction(interaction, AgentTypes.Manager);
 
     return assigned;
   }
@@ -93,34 +91,11 @@ export class ContactCenterService implements OnDestroy {
     return false;
   }
 
-  public isAgentBusy(agentId: string): boolean {
-    return !this.isAgentAvailableForMessages(agentId) && !this.isAgentAvailableForPhones(agentId);
-  }
+  private assignAgentToInteraction(interaction: InteractionInterface, agentType: AgentTypes): boolean {
+    const availableAgents = this.agentsService.getAgents(agentType);
+    const freeAgent = availableAgents.find(a => this.isAgentAvailableForInteraction(a, interaction));
 
-  private getAvailableAgents(agentType: AgentTypes): Array<BaseAgent> {
-    return this.agentsService.getAgents(agentType).filter(a => !this.isAgentBusy(a.id));
-  }
-
-  private assignAgentToInteraction(interaction: InteractionInterface): boolean {
-    const availableAgents = this.getAvailableAgents(AgentTypes.Agent);
-    return !!availableAgents.length && this.tentativeAssignInteraction(availableAgents, interaction);
-  }
-
-  private assignSupervisorToInteraction(interaction: InteractionInterface): boolean {
-    const availableSupervisors = this.getAvailableAgents(AgentTypes.Supervisor);
-    return !!availableSupervisors.length && this.tentativeAssignInteraction(availableSupervisors, interaction);
-  }
-
-  private assignManagerToInteraction(interaction: InteractionInterface): boolean {
-    const availableManagers = this.getAvailableAgents(AgentTypes.Manager);
-    return !!availableManagers.length && this.tentativeAssignInteraction(availableManagers, interaction);
-  }
-
-
-  private tentativeAssignInteraction(agentList: Array<AgentInterface>, interaction: InteractionInterface): boolean {
-    return !!agentList
-      .filter(a => this.isAgentAvailableForInteraction(a, interaction))
-      .reduce((prev: AgentInterface | undefined, availableAgent) => !prev && !!availableAgent ? this.assignInteraction(availableAgent, interaction) : prev, undefined);
+    return !!availableAgents.length && !!freeAgent && !!this.assignInteraction(freeAgent, interaction);
   }
 
   private isAgentAvailableForInteraction(agent: BaseAgent, interaction: InteractionInterface): boolean {
@@ -138,17 +113,13 @@ export class ContactCenterService implements OnDestroy {
     const currentAssigned = this.agentsOnInteractions.value;
 
     this.agentsService.addInteractionToAgent(agent.id, interaction.id);
+    this.interactionsService.addInteractionToActive(interaction);
 
-    const interactionObserver = this.interactionsService.startInteraction(interaction);
+    const interactionObserver = this.interactionsService.startInteraction$(interaction);
+    this.agentsOnInteractions.next({ ...currentAssigned, [interaction.id]: { agentId: agent.id } });
 
     const subscriberToInteraction = interactionObserver
-      .pipe(distinctUntilChanged())
       .subscribe((status: InteractionStatus) => {
-        if (status.hasStarted) {
-          this.agentsOnInteractions.next({ ...currentAssigned, [interaction.id]: { agentId: agent.id } });
-          this.interactionsService.addInteractionToActive(interaction);
-        }
-
         if (status.hasEnded) {
           const { [interaction.id]: { agentId }, ...currentInteractions } = this.agentsOnInteractions.value;
           this.agentsService.removeInteractionFromAgent(agentId, interaction.id);

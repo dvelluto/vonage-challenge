@@ -3,9 +3,7 @@ import { Injectable } from '@angular/core';
 import { AgentInterface, AgentTypes } from '@libs/agents';
 import { Agent, Manager, Supervisor } from '../models';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class AgentsService {
   private agents: Array<Agent> = [];
   private supervisors: Array<Supervisor> = [];

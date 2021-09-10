@@ -1,9 +1,17 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AgentsService } from '@libs/agents';
+import { AgentsModule } from '@libs/agents';
+import { InteractionsModule } from '@libs/interactions';
+import { ContactCenterService } from './services';
 
 @NgModule({
-  imports: [CommonModule],
-  providers: [AgentsService]
+  imports: [
+    CommonModule,
+    AgentsModule,
+    InteractionsModule
+  ],
+  providers: [
+    ContactCenterService
+  ]
 })
 export class ContactCenterModule { }

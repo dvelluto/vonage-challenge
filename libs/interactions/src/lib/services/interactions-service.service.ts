@@ -5,15 +5,13 @@ import { InteractionTypes } from '../enums';
 import { InteractionInterface, InteractionStatus } from '../interfaces';
 import { InteractionsByType, MessageInteraction, PhoneInteraction } from '../models';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class InteractionsService {
   private activeInteractions: Array<InteractionInterface> = [];
 
   constructor() { }
 
-  public startInteraction(interaction: InteractionInterface): Observable<InteractionStatus> {
+  public startInteraction$(interaction: InteractionInterface): Observable<InteractionStatus> {
     const interactionSubject = new BehaviorSubject(interaction.status);
 
     return interactionSubject.asObservable().pipe(
